@@ -72,9 +72,10 @@ class SnakeMasterActor(system: ActorSystem)(implicit val executionContext: Execu
       clientId -> client.copy(snakeState = state)
     }
     clients.values.foreach { client =>
-      client.ref ! WorldState(
-        applePosition = applePosition,
-        snakeState = client.snakeState
+      client.ref !  WorldState(
+        player = client.snakeState,
+        others = clients.values.filter(_ != client).map(_.snakeState).toList,
+        applePosition = applePosition
       )
     }
   }

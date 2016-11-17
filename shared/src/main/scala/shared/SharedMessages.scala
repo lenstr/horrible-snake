@@ -31,6 +31,7 @@ case class SnakeState(
 )
 
 case class WorldState(
-  snakeState: SnakeState,
+  player: SnakeState,
+  others: List[SnakeState],
   applePosition: Vector2
 )

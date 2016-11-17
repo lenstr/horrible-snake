@@ -21,9 +21,14 @@ object SnakeClient extends js.JSApp {
 
   def main(): Unit = {
 
+    val logicalW = 40
+    val logicalH = 30
+
+    val size = Vector2(logicalW, logicalH)
+    val renderer = new SnakeRenderer("canvas", size)
+
     val ws = new WebSocket("ws://localhost:9000/ws")
     ws.onopen = (event: raw.Event) => {
-
     }
     ws.onclose = (event: CloseEvent) => {
       println(s"onclose ${event.reason}")
@@ -32,32 +37,14 @@ object SnakeClient extends js.JSApp {
       println("onerror")
     }
 
-    val logicalW = 40
-    val logicalH = 30
-
-    val size = Vector2(logicalW, logicalH)
-    val renderer = new SnakeRenderer("canvas", size)
-
-    def randomPosition(): Vector2 = {
-      val x = math.floor(math.random * logicalW)
-      val y = math.floor(math.random * logicalH)
-      Vector2(x, y)
-    }
-
-    var state = WorldState(
-      SnakeState(
-        snakePosition = randomPosition(),
-        snakeTail = Nil,
-        direction = Direction.random(),
-        score = 0
-      ),
-      applePosition = randomPosition()
-    )
-
+    val scores = org.scalajs.dom.document.getElementById("scores")
     ws.onmessage = (event: MessageEvent) => {
       val expr = event.data.asInstanceOf[String]
-      state = upickle.default.read[WorldState](expr)
-      println(state)
+      val state = upickle.default.read[WorldState](expr)
+      val playerScore = s"<h1>Score: ${state.player.score}</h1>"
+      val otherScores = state.others.map(other => s"""<h1 style="color: orange">Score: ${other.score}</h1>""").mkString("")
+      scores.innerHTML = playerScore + otherScores
+      renderer.render(state)
     }
 
     document.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -66,8 +53,6 @@ object SnakeClient extends js.JSApp {
         ws.send(msg)
       }
     })
-
-    renderer.start(getState = () => state)
   }
 
   def handleArrows(event: KeyboardEvent): Option[String] = {

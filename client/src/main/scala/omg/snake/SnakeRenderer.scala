@@ -14,8 +14,8 @@ class SnakeRenderer(canvasId: String, size: Vector2) {
 
   def clear() = brush.clearRect(0, 0, canvas.width, canvas.height)
 
-  def renderSnake(head: Vector2, tail: List[Vector2]): Unit = {
-    brush.fillStyle = "black"
+  def renderSnake(head: Vector2, tail: List[Vector2], color: String): Unit = {
+    brush.fillStyle = color
     (head +: tail).foreach { tail =>
       brush.fillRect(tail.x * pointSize.x, tail.y * pointSize.y, pointSize.x, pointSize.y)
     }
@@ -45,6 +45,9 @@ class SnakeRenderer(canvasId: String, size: Vector2) {
     clear()
     renderBorder()
     renderApple(state.applePosition)
-    renderSnake(state.snakeState.snakePosition, state.snakeState.snakeTail)
+    renderSnake(state.player.snakePosition, state.player.snakeTail, "black")
+    state.others.foreach { snake =>
+      renderSnake(snake.snakePosition, snake.snakeTail, "orange")
+    }
   }
 }
