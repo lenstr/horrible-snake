@@ -1,11 +1,8 @@
 package omg.snake
 
 import org.scalajs.dom._
-import shared.{WorldState, Vector2}
+import shared.{Vector2, WorldState}
 
-/**
-  * Created by lenstr on 11/17/2016.
-  */
 class SnakeRenderer(canvasId: String, size: Vector2) {
 
   private[this] val canvas = document.getElementById(canvasId).asInstanceOf[html.Canvas]
@@ -45,9 +42,9 @@ class SnakeRenderer(canvasId: String, size: Vector2) {
     clear()
     renderBorder()
     renderApple(state.applePosition)
-    renderSnake(state.player.snakePosition, state.player.snakeTail, "black")
+    renderSnake(state.player.position, state.player.tail, "black")
     state.others.foreach { snake =>
-      renderSnake(snake.snakePosition, snake.snakeTail, "orange")
+      renderSnake(snake.position, snake.tail, "orange")
     }
   }
 }

@@ -2,17 +2,14 @@ package actors
 
 import java.util.UUID
 
-import akka.actor.{Actor, ActorRef, ActorSystem}
-import shared.{Direction, NextDirection, WorldState}
-
-import scala.concurrent.ExecutionContext
+import akka.actor.{Actor, ActorRef}
+import shared.{Direction, WorldState}
 
 class SnakeSocketActor(
   out: ActorRef,
   master: ActorRef,
   clientId: UUID
-)(implicit val system: ActorSystem, executionContext: ExecutionContext)
-  extends Actor {
+)  extends Actor {
 
   override def preStart(): Unit = {
     master ! RegisterClient(self, clientId)
@@ -23,7 +20,7 @@ class SnakeSocketActor(
   }
 
   override def receive: Receive = {
-    case NextDirection(Direction(direction)) =>
+    case direction: Direction =>
       master ! ChangeDirection(direction, clientId)
     case state: WorldState =>
       out ! state

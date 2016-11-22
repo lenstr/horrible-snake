@@ -1,4 +1,5 @@
 lazy val scalaV = "2.11.8"
+lazy val upickleV = "0.4.4"
 
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
@@ -9,7 +10,7 @@ lazy val server = (project in file("server")).settings(
   compile in Compile <<= (compile in Compile) dependsOn scalaJSPipeline,
   libraryDependencies ++= Seq(
     "com.vmunier" %% "scalajs-scripts" % "1.0.0",
-    "com.lihaoyi" %% "upickle" % "0.4.3",
+    "com.lihaoyi" %% "upickle" % upickleV,
     specs2 % Test
   ),
   // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
@@ -23,13 +24,18 @@ lazy val client = (project in file("client")).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.lihaoyi" %%% "upickle" % "0.4.3"
+    "com.lihaoyi" %%% "upickle" % upickleV
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(sharedJs)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
-  settings(scalaVersion := scalaV).
+  settings(
+    scalaVersion := scalaV,
+    libraryDependencies ++= Seq(
+      "com.lihaoyi" %% "upickle" % upickleV
+    )
+  ).
   jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJvm = shared.jvm

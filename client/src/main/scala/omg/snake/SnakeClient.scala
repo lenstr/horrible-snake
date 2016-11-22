@@ -1,23 +1,13 @@
 package omg.snake
 
+import omg.snake.models.Formats._
 import org.scalajs.dom._
 import org.scalajs.dom.raw.WebSocket
 import shared._
-import upickle.Js
-import upickle.Js.Value
 
 import scala.scalajs.js
 
 object SnakeClient extends js.JSApp {
-
-  implicit val directionReader = new upickle.default.Reader[Direction] {
-    override def read0: PartialFunction[Value, Direction] = {
-      case Js.Str("up") => Up
-      case Js.Str("down") => Down
-      case Js.Str("left") => Left
-      case Js.Str("right") => Right
-    }
-  }
 
   def main(): Unit = {
 
@@ -27,7 +17,7 @@ object SnakeClient extends js.JSApp {
     val size = Vector2(logicalW, logicalH)
     val renderer = new SnakeRenderer("canvas", size)
 
-    val ws = new WebSocket("ws://localhost:9000/ws")
+    val ws = new WebSocket(s"ws://${window.location.host}/ws")
     ws.onopen = (event: raw.Event) => {
     }
     ws.onclose = (event: CloseEvent) => {
@@ -37,10 +27,10 @@ object SnakeClient extends js.JSApp {
       println("onerror")
     }
 
-    val scores = org.scalajs.dom.document.getElementById("scores")
+    val scores = document.getElementById("scores")
     ws.onmessage = (event: MessageEvent) => {
-      val expr = event.data.asInstanceOf[String]
-      val state = upickle.default.read[WorldState](expr)
+      val data = event.data.asInstanceOf[String]
+      val state = upickle.default.read[WorldState](data)
       val playerScore = s"<h1>Score: ${state.player.score}</h1>"
       val otherScores = state.others.map(other => s"""<h1 style="color: orange">Score: ${other.score}</h1>""").mkString("")
       scores.innerHTML = playerScore + otherScores
@@ -49,18 +39,18 @@ object SnakeClient extends js.JSApp {
 
     document.addEventListener("keydown", (event: KeyboardEvent) => {
       handleArrows(event).foreach { direction =>
-        val msg = upickle.default.write(NextDirection(direction))
+        val msg = upickle.default.write(direction.value)
         ws.send(msg)
       }
     })
   }
 
-  def handleArrows(event: KeyboardEvent): Option[String] = {
+  def handleArrows(event: KeyboardEvent): Option[Direction] = {
     event.key match {
-      case "ArrowLeft" => Some("left")
-      case "ArrowRight" => Some("right")
-      case "ArrowUp" => Some("up")
-      case "ArrowDown" => Some("down")
+      case "ArrowLeft" => Some(Left)
+      case "ArrowRight" => Some(Right)
+      case "ArrowUp" => Some(Up)
+      case "ArrowDown" => Some(Down)
       case _ => None
     }
   }
