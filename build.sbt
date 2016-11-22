@@ -13,9 +13,17 @@ lazy val server = (project in file("server")).settings(
     "com.lihaoyi" %% "upickle" % upickleV,
     specs2 % Test
   ),
+  javaOptions in Universal ++= Seq(
+    "-Dpidfile.path=/dev/null"
+  ),
+  dockerBaseImage := "openjdk",
+  dockerExposedPorts := Seq(9000),
+  dockerRepository := Some("lenstr"),
+  dockerUpdateLatest := true,
+  packageName in Docker := "horrible-snake",
   // Compile the project before generating Eclipse files, so that generated .scala or .class files for views and routes are present
   EclipseKeys.preTasks := Seq(compile in Compile)
-).enablePlugins(PlayScala).
+).enablePlugins(PlayScala, DockerPlugin).
   dependsOn(sharedJvm)
 
 lazy val client = (project in file("client")).settings(
