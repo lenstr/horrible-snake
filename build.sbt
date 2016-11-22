@@ -1,5 +1,6 @@
 lazy val scalaV = "2.11.8"
 lazy val upickleV = "0.4.4"
+lazy val quicklensV = "1.4.8"
 
 lazy val server = (project in file("server")).settings(
   scalaVersion := scalaV,
@@ -11,6 +12,7 @@ lazy val server = (project in file("server")).settings(
   libraryDependencies ++= Seq(
     "com.vmunier" %% "scalajs-scripts" % "1.0.0",
     "com.lihaoyi" %% "upickle" % upickleV,
+    "com.softwaremill.quicklens" %%% "quicklens" % quicklensV,
     specs2 % Test
   ),
   javaOptions in Universal ++= Seq(
@@ -32,7 +34,8 @@ lazy val client = (project in file("client")).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.lihaoyi" %%% "upickle" % upickleV
+    "com.lihaoyi" %%% "upickle" % upickleV,
+    "com.softwaremill.quicklens" %%% "quicklens" % quicklensV
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(sharedJs)

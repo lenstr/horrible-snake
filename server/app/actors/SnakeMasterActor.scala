@@ -3,6 +3,7 @@ package actors
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef}
+import com.softwaremill.quicklens._
 import shared.{Direction, Down, Left, Right, SnakeState, Up, Vector2, WorldState}
 
 import scala.concurrent.duration.{Duration, _}
@@ -24,8 +25,8 @@ class SnakeMasterActor extends Actor {
 
   object Update
 
-  import context._
   import SnakeUtils._
+  import context._
 
   private val schedule = context.system.scheduler.schedule(
     initialDelay = Duration.Zero,
@@ -50,9 +51,8 @@ class SnakeMasterActor extends Actor {
     case UnregisterClient(clientId) =>
       clients -= clientId
     case ChangeDirection(direction, clientId) =>
-      clients.get(clientId).foreach { client =>
-        val snakeState = client.snakeState
-        clients += clientId -> client.copy(snakeState = snakeState.copy(direction = direction))
+      clients ++= clients.get(clientId).map { client =>
+        clientId -> client.modify(_.snakeState.direction).setTo(direction)
       }
     case Update =>
       update()
@@ -86,12 +86,9 @@ class SnakeMasterActor extends Actor {
     val snakePosition = state.position
     if (snakePosition == applePosition) {
       applePosition = randomPosition()
-      val snakeTail = state.tail
-      val snakeState = state.copy(
-        tail = snakeTail :+ snakeTail.lastOption.getOrElse(snakePosition),
-        score = state.score + 1
-      )
-      snakeState
+      state
+        .modify(_.tail).using(tail => tail :+ tail.lastOption.getOrElse(snakePosition))
+        .modify(_.score).using(_ + 1)
     } else {
       state
     }
@@ -110,12 +107,13 @@ object SnakeUtils {
   def updateSnakePosition(state: SnakeState): SnakeState = {
     val position = state.position
     val (posX, posY) = (position.x, position.y)
-    state.direction match {
-      case Left => state.copy(position = Vector2(posX - 1, posY))
-      case Right => state.copy(position = Vector2(posX + 1, posY))
-      case Up => state.copy(position = Vector2(posX, posY - 1))
-      case Down => state.copy(position = Vector2(posX, posY + 1))
+    val newPosition = state.direction match {
+      case Left => Vector2(posX - 1, posY)
+      case Right => Vector2(posX + 1, posY)
+      case Up => Vector2(posX, posY - 1)
+      case Down => Vector2(posX, posY + 1)
     }
+    state.copy(position = newPosition)
   }
 
   def handleBounds(w: Int, h: Int, snakePosition: Vector2): Vector2 = {
