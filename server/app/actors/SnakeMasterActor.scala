@@ -25,7 +25,6 @@ class SnakeMasterActor extends Actor {
 
   object Update
 
-  import SnakeUtils._
   import context._
 
   private val schedule = context.system.scheduler.schedule(
@@ -65,6 +64,8 @@ class SnakeMasterActor extends Actor {
   }
 
   def update(): Unit = {
+    import shared.SnakeUtils._
+
     clients = clients.map { case (clientId, client) =>
       val snakeState = client.snakeState
       var state = updateSnakePosition(snakeState)
@@ -95,41 +96,3 @@ class SnakeMasterActor extends Actor {
   }
 }
 
-object SnakeUtils {
-
-  def updateSnakeTail(initialPosition: Vector2, state: SnakeState): SnakeState = {
-    val (snakeTail, _) = state.tail.foldLeft((List.empty[Vector2], initialPosition)) {
-      case ((newTail, oldPosition), node) => (newTail :+ oldPosition, node)
-    }
-    state.copy(tail = snakeTail)
-  }
-
-  def updateSnakePosition(state: SnakeState): SnakeState = {
-    val position = state.position
-    val (posX, posY) = (position.x, position.y)
-    val newPosition = state.direction match {
-      case Left => Vector2(posX - 1, posY)
-      case Right => Vector2(posX + 1, posY)
-      case Up => Vector2(posX, posY - 1)
-      case Down => Vector2(posX, posY + 1)
-    }
-    state.copy(position = newPosition)
-  }
-
-  def handleBounds(w: Int, h: Int, snakePosition: Vector2): Vector2 = {
-    var position = snakePosition
-    if (position.x < 0) {
-      position = Vector2(w - 1, position.y)
-    }
-    if (position.x >= w) {
-      position = Vector2(0, position.y)
-    }
-    if (position.y < 0) {
-      position = Vector2(position.x, h - 1)
-    }
-    if (position.y >= h) {
-      position = Vector2(position.x, 0)
-    }
-    position
-  }
-}
