@@ -16,16 +16,16 @@ case class UnregisterClient(clientId: UUID)
 case class ChangeDirection(direction: Direction, clientId: UUID)
 
 class SnakeMasterActor extends Actor {
+
+  import context._
+
   val logicalW = 40
   val logicalH = 30
 
-  var clients = Map.empty[UUID, SnakeClient]
-
-  var applePosition = randomPosition()
+  private[this] var clients = Map.empty[UUID, SnakeClient]
+  private[this] var applePosition = randomPosition()
 
   object Update
-
-  import context._
 
   private val schedule = context.system.scheduler.schedule(
     initialDelay = Duration.Zero,

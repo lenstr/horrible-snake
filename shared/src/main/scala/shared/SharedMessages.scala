@@ -11,7 +11,7 @@ object Up extends Direction("up")
 object Down extends Direction("down")
 
 object Direction {
-  def random() = Random.shuffle(Seq(Up, Down, Left, Right)).head
+  def random(): Direction = Random.shuffle(Seq(Up, Down, Left, Right)).head
 }
 
 case class SnakeState(

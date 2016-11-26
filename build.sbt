@@ -53,5 +53,14 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared")).
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
+lazy val bot = (project in file("bot")).settings(
+  scalaVersion := scalaV,
+  libraryDependencies ++= Seq(
+    "com.github.andyglow" %% "websocket-scala-client" % "0.2.0",
+    "com.lihaoyi" %% "upickle" % upickleV
+
+  )
+).dependsOn(sharedJvm)
+
 // loads the server project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
